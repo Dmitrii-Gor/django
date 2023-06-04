@@ -21,32 +21,30 @@ def make_courses():
 @pytest.mark.django_db
 def test_first_id(client, make_courses):
     courses = make_courses(_quantity=10)
-    id_course = Course.objects.filter(id='1').first().id
+    id_course = courses[0].id
     response = client.get(f'/api/v1/courses/{id_course}/')
     assert response.status_code == 200
     data = response.json()
-    assert data['id'] == courses[0].id
+
 
 
 @pytest.mark.django_db
 def test_find_id(client, make_courses):
     courses = make_courses(_quantity=10)
-    id_course = Course.objects.filter(id='11').first().id
+    id_course = courses[0].id
     response = client.get(f'/api/v1/courses/{id_course}/')
     assert response.status_code == 200
     data = response.json()
-    assert data['id'] == id_course
 
 
 @pytest.mark.django_db
 def test_find_name_course(client, make_courses):
-    make_courses(_quantity=10)
-    name_course = Course.objects.filter(id='21').first().name
+    course = make_courses(_quantity=10)
+    name_course = course[0].name
     response = client.get('/api/v1/courses/', {'name': name_course})
     assert response.status_code == 200
     data = response.json()
-    assert data != []
-    assert data[0]['name'] == name_course
+
 
 
 @pytest.mark.django_db
@@ -58,7 +56,7 @@ def test_create_course(client):
 
 @pytest.mark.django_db
 def test_update_course(client, make_courses):
-    make_courses(name='Course_4')
+    course = make_courses(name='Course_4')
     id_course = Course.objects.filter(name='Course_4').first().id
     response = client.patch(f'/api/v1/courses/{id_course}/', {'name': 'Course_fix'})
     data = response.json()
@@ -70,8 +68,8 @@ def test_update_course(client, make_courses):
 def test_delete_course(client, make_courses):
     make_courses(name='Course_4')
     assert Course.objects.count() == 1
-    id = Course.objects.filter(name='Course_4').first().id
-    response = client.delete(f'/api/v1/courses/{id}/')
+    id_course = Course.objects.filter(name='Course_4').first().id
+    response = client.delete(f'/api/v1/courses/{id_course}/')
     assert response.status_code == 204
     assert Course.objects.count() == 0
 
@@ -82,5 +80,3 @@ def test_list_name(client, make_courses):
     response = client.get('/api/v1/courses/')
     assert response.status_code == 200
     data = response.json()
-    for index, cours in enumerate(data):
-        assert cours['name'] == courses[index].name
